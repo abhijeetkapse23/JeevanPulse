@@ -1,0 +1,10 @@
+{
+  "appId": "in.jeevanpulse.app",
+  "appName": "JeevanPulse",
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#F28C28"
+    }
+  }
+}
