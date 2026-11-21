@@ -13,17 +13,8 @@
 - **Phone reminders** (Android app) for each medicine and the daily pulse.
 
 ## Get the app
-
-| What | Where |
-|---|---|
-| Website / home-screen app | `https://abhijeetkapse23.github.io/JeevanPulse/` |
-| Android APK | **Releases → JeevanPulse (latest build) → JeevanPulse.apk** |
-
-### One-time setup on GitHub
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-2. Open the **Actions** tab. Both workflows run on every push to `main`:
-   - *Publish website (GitHub Pages)*
-   - *Build Android app (APK)*: takes about 5–8 minutes.
+The Android APK is built automatically by GitHub Actions on every push to `main` (about 5–8 minutes).
+Download it from **Releases → JeevanPulse (latest build) → JeevanPulse.apk**.
 
 ### Install on an Android phone
 1. On the phone, open the repo's **Releases** page and download `JeevanPulse.apk`.
@@ -32,10 +23,10 @@
 
 ## Project layout
 ```
-www/                 the app (HTML/CSS/JS, one file) + manifest, offline cache, icons
+www/                 the app (HTML/CSS/JS, one file) + icons
 assets/icon.png      app icon used for the Android build
 capacitor.config.json
-.github/workflows/   pages.yml (website), android.yml (APK build)
+.github/workflows/   android.yml (APK build)
 ```
 
 ## Roadmap: fully automatic alerts
