@@ -1,39 +1,50 @@
 # JeevanPulse ♥
 
-**One daily pulse of well-being.** A check-in and medicine-care app for families in India, in English, हिंदी and मराठी.
+**One tap tells your loved ones you're OK.** A simple Android safety check-in app, in English, हिंदी and मराठी (it follows the phone's language).
 
-- **Daily JeevanPulse:** one tap tells family "I'm OK today".
-- **Medicine + JeevanPulse mode:** ticking your medicines counts as the day's pulse, so there's no double-tapping.
-- **Quick view** ("Which all today?") and **Deep view** (time, days, before/after food, dose, refill reminders).
-- **History:** a 14-day calendar plus pattern spotting, e.g. "Night dose skipped 3 of last 7 days".
-- **Family view:** calm status cards (Pulse active, All meds taken, Dose pending, Skipped/Overdue).
-- **Alerts in two stages:**
-  1. When the pulse or a dose is missed (after a grace window), family gets a ready-to-send WhatsApp message.
-  2. If there's still no pulse a few hours later, the emergency contact is alerted, with Call and 112 buttons.
-- **Phone reminders** (Android app) for each medicine and the daily pulse.
+## How it works
+1. JeevanPulse sends a notification: **"Are you OK?"** with an **I'm OK** button.
+2. **Tapped:** it's logged on the phone and nothing is sent.
+3. **Not tapped:** every loved one gets an **SMS** alert.
+4. **3 missed in a row:** the **emergency contact is phoned** automatically.
+5. **Tapped any time later:** the counter resets, and loved ones get an "all OK" SMS.
+
+- Loved ones are picked from the **phone's contact list**, with no typing of numbers.
+- The first person added becomes the **emergency contact**. Tap "Make emergency" to change it.
+- **112 is never dialled automatically.** If there is no emergency contact, the app only shows a notification that opens the dialer with 112.
+
+### Check-in interval
+| Setting | Asks every | Time to answer before it counts as missed |
+|---|---|---|
+| 2 minutes (testing) | 2 min | 2 min |
+| 12 hours | 12 h | 30 min |
+| Daily | 24 h | 30 min |
+
+With **testing** mode: the first reminder comes 2 min after Start. No tap leads to an SMS at 4 min, and still no tap leads to a call at 8 min.
 
 ## Get the app
-The Android APK is built automatically by GitHub Actions on every push to `main` (about 5–8 minutes).
-Download it from **Releases → JeevanPulse (latest build) → JeevanPulse.apk**.
+GitHub Actions builds the APK on every push to `main` (about 3–5 minutes).
+On the phone, open **Releases → JeevanPulse (latest build) → JeevanPulse.apk**, download it, and install it. Allow "Install unknown apps" when asked.
 
-### Install on an Android phone
-1. On the phone, open the repo's **Releases** page and download `JeevanPulse.apk`.
-2. Open it. When asked, allow **"Install unknown apps"** for your browser.
-3. Open JeevanPulse and allow notifications, so medicine and pulse reminders work.
+### First run
+1. Add at least one loved one (**+ Add from contacts**).
+2. Tap **Start JeevanPulse**, and **allow** Notifications, SMS and Phone.
+3. When asked, allow **"Alarms & reminders"** and **"Don't optimise battery"**, so reminders come on time.
+   On Xiaomi, Oppo, Vivo and Realme phones, also turn on **Autostart** for JeevanPulse in the phone settings.
+
+## Notes
+- SMS and calls use the phone's own SIM, so normal SMS and call charges apply.
+- The automatic SMS and call permissions are fine for a sideloaded APK. Google Play restricts them, so a Play Store version would need a server to send SMS and calls instead (e.g. MSG91 / Exotel).
+- The app works offline. Nothing leaves the phone except the SMS and calls you configure.
 
 ## Project layout
 ```
-www/                 the app (HTML/CSS/JS, one file) + icons
-assets/icon.png      app icon used for the Android build
-capacitor.config.json
-.github/workflows/   android.yml (APK build)
+app/src/main/java/com/jeevanpulse/app/
+  MainActivity.java    the screen (status, I'm OK, loved ones, settings, log)
+  Pulse.java           all logic: schedule, missed counter, SMS, call
+  AlarmReceiver.java   fires each check-in
+  OkReceiver.java      the "I'm OK" button on the notification
+  BootReceiver.java    restores the schedule after reboot
+app/src/main/res/      layout, strings (en / hi / mr), icons
+.github/workflows/android.yml   builds and publishes the APK
 ```
-
-## Roadmap: fully automatic alerts
-Right now the alerts open WhatsApp with the message ready to send, and someone taps Send. For hands-free alerts, even when the phone is off:
-- **Firebase** (Auth + Firestore + a scheduled Cloud Function that checks for missed pulses every few minutes)
-- **WhatsApp Business API** (Gupshup / Interakt / Meta Cloud API) with approved message templates
-- **SMS** via MSG91 (DLT registration required in India)
-- **Automatic voice call** to the emergency contact via Exotel
-- A **family login** to see status cards remotely
-- Privacy policy and consent screens (DPDP Act 2023) before public launch

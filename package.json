@@ -1,9 +1,0 @@
-{
-  "name": "jeevanpulse",
-  "version": "1.0.0",
-  "private": true,
-  "description": "JeevanPulse – daily check-in and medicine care for families in India",
-  "scripts": {
-    "sync": "npx cap sync android"
-  }
-}

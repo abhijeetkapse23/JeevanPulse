@@ -1,5 +1,6 @@
-node_modules/
-android/
-ios/
-package-lock.json
+.gradle/
+build/
+app/build/
+local.properties
 *.apk
+.idea/

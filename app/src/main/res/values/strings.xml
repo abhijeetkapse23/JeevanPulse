@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">JeevanPulse</string>
+    <string name="tagline">One tap tells your loved ones you\'re OK</string>
+    <string name="im_ok">I\'m OK</string>
+    <string name="status_off">JeevanPulse is off</string>
+    <string name="status_off_hint">Add a loved one, then tap Start</string>
+    <string name="status_good">All good ✓</string>
+    <string name="status_waiting">Waiting for your tap</string>
+    <string name="status_missed">Missed %1$d of %2$d — loved ones alerted</string>
+    <string name="next_check">Next check-in at %1$s</string>
+    <string name="next_reminder">Next reminder at %1$s</string>
+    <string name="start">Start JeevanPulse</string>
+    <string name="stop">Stop JeevanPulse</string>
+    <string name="mode_label">Ask me every</string>
+    <string name="name_label">Your name (used in messages)</string>
+    <string name="name_hint">e.g. Papa</string>
+    <string name="loved_ones">Loved ones</string>
+    <string name="add_contact">+ Add from contacts</string>
+    <string name="emergency">🚨 Emergency</string>
+    <string name="make_emergency">Make emergency</string>
+    <string name="no_contacts">No loved ones added yet. If you miss 3 check-ins, the app will only suggest dialling 112.</string>
+    <string name="no_emergency">Mark one person as emergency — they get the phone call. Without one, the app suggests 112.</string>
+    <string name="how_text">How it works:\n1. You get a notification: tap “I\'m OK”.\n2. Tapped → logged on your phone, nothing is sent.\n3. Not tapped → your loved ones get an SMS.\n4. 3 missed in a row → your emergency contact is called.\n5. Tap any time later → everything resets and loved ones are told you\'re OK.</string>
+    <string name="log_title">Activity log</string>
+    <string name="log_empty">Nothing yet.</string>
+    <string name="default_name">Your family member</string>
+    <string name="ch_prompt">Check-in reminders</string>
+    <string name="ch_alert">Emergency alerts</string>
+    <string name="n_prompt_title">JeevanPulse ♥ Are you OK?</string>
+    <string name="n_prompt_text">Tap “I\'m OK” so we don\'t alert your loved ones.</string>
+    <string name="n_prompt_missed">Missed %1$d of %2$d. Your loved ones were messaged — tap “I\'m OK” now.</string>
+    <string name="n_ok">I\'m OK ✓</string>
+    <string name="n_calling_title">Calling %1$s</string>
+    <string name="n_calling_text">You missed %1$d check-ins in a row.</string>
+    <string name="n_call_fallback">Tap to call %1$s</string>
+    <string name="n_no_contact_title">No emergency contact set</string>
+    <string name="n_no_contact_text">You missed %1$d check-ins and no emergency contact is set. If this is an emergency, tap to open the dialer with 112.</string>
+    <string name="sms_alert">JeevanPulse alert: %1$s has not responded to their safety check-in. Please call or check on them.</string>
+    <string name="sms_ok">JeevanPulse: %1$s has now checked in. Everything is OK.</string>
+    <string name="log_started">Started (%1$s)</string>
+    <string name="log_stopped">Stopped</string>
+    <string name="log_ok">Tapped I\'m OK</string>
+    <string name="log_ok_told">Tapped I\'m OK — loved ones told all is well</string>
+    <string name="log_missed">Missed check-in (%1$d of %2$d)</string>
+    <string name="log_sms">SMS sent to %1$d loved one(s)</string>
+    <string name="log_sms_none">SMS not sent — no loved ones or no SMS permission</string>
+    <string name="log_call">Calling %1$s</string>
+    <string name="log_call_blocked">Phone blocked auto-call to %1$s — tap-to-call shown</string>
+    <string name="log_no_emergency">No emergency contact — suggested 112</string>
+    <string name="log_contact_added">Added %1$s</string>
+    <string name="toast_ok">Logged. Your loved ones won\'t be alerted.</string>
+    <string name="toast_need_perm">Please allow SMS, Phone and Notifications so JeevanPulse can protect you.</string>
+    <string-array name="modes"><item>2 minutes (testing)</item><item>12 hours</item><item>Daily</item></string-array>
+</resources>
