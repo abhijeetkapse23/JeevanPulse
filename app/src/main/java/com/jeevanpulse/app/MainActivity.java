@@ -3,6 +3,7 @@ package com.jeevanpulse.app;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -15,6 +16,7 @@ import android.os.PowerManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
@@ -73,7 +75,7 @@ public class MainActivity extends Activity {
         llLog = findViewById(R.id.llLog);
 
         btnOk.setOnClickListener(v -> {
-            Pulse.ok(this);
+            Pulse.ok(this, null);
             Toast.makeText(this, R.string.toast_ok, Toast.LENGTH_SHORT).show();
             refresh();
         });
@@ -224,6 +226,85 @@ public class MainActivity extends Activity {
         refresh();
     }
 
+    // ---------- WhatsApp ----------
+
+    /** One-time WhatsApp setup for a loved one: they activate CallMeBot and give us their key. */
+    private void whatsappDialog(int index) {
+        JSONArray a = Pulse.contacts(this);
+        JSONObject o = a.optJSONObject(index);
+        if (o == null) return;
+        final String name = o.optString("name");
+        final String phone = o.optString("phone");
+
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(22), dp(8), dp(22), 0);
+
+        TextView info = new TextView(this);
+        info.setText(getString(R.string.wa_dialog_text, name));
+        info.setTextSize(14);
+        info.setTextColor(0xFF4A3F35);
+        info.setLineSpacing(dp(3), 1f);
+        info.setTextIsSelectable(true);
+        box.addView(info);
+
+        final EditText key = new EditText(this);
+        key.setHint(R.string.wa_key_hint);
+        key.setInputType(InputType.TYPE_CLASS_NUMBER);
+        key.setText(o.optString("wa_key", ""));
+        box.addView(key);
+
+        AlertDialog d = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.wa_dialog_title, name))
+                .setView(box)
+                .setPositiveButton(R.string.wa_save, (dlg, w) -> saveWaKey(index, key.getText().toString()))
+                .setNegativeButton(R.string.wa_guide, null)
+                .setNeutralButton(R.string.wa_test, null)
+                .create();
+        d.setOnShowListener(x -> {
+            // These two must not close the dialog.
+            d.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Messenger.SETUP_GUIDE)));
+                } catch (Exception ignored) { }
+            });
+            d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
+                final String k = key.getText().toString().trim();
+                if (k.isEmpty()) {
+                    Toast.makeText(this, R.string.wa_key_hint, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                saveWaKey(index, k);
+                Toast.makeText(this, R.string.wa_testing, Toast.LENGTH_SHORT).show();
+                final String msg = getString(R.string.wa_test_msg, Pulse.displayName(this));
+                new Thread(() -> {
+                    boolean okSent = Messenger.whatsapp(phone, k, msg);
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, okSent ? R.string.wa_test_ok : R.string.wa_test_fail,
+                                Toast.LENGTH_LONG).show();
+                        Pulse.addLog(this, getString(okSent ? R.string.log_wa_test_ok
+                                : R.string.log_wa_test_fail, name));
+                        refresh();
+                    });
+                }).start();
+            });
+        });
+        d.show();
+    }
+
+    private void saveWaKey(int index, String key) {
+        JSONArray a = Pulse.contacts(this);
+        JSONObject o = a.optJSONObject(index);
+        if (o == null) return;
+        try {
+            String k = key.trim();
+            if (k.isEmpty()) o.remove("wa_key");
+            else o.put("wa_key", k);
+        } catch (JSONException ignored) { }
+        Pulse.saveContacts(this, a);
+        refresh();
+    }
+
     private void removeContact(int index) {
         JSONArray a = Pulse.contacts(this);
         JSONArray n = new JSONArray();
@@ -286,16 +367,37 @@ public class MainActivity extends Activity {
             final int idx = i;
             boolean em = o.optBoolean("emergency");
 
+            boolean wa = !o.optString("wa_key", "").isEmpty();
+
+            LinearLayout card = new LinearLayout(this);
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(0, dp(10), 0, dp(10));
+
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(0, dp(10), 0, dp(10));
 
             TextView t = new TextView(this);
             t.setText(o.optString("name") + "\n" + o.optString("phone"));
             t.setTextSize(15);
             t.setTextColor(0xFF2B2118);
             row.addView(t, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+            Button bX = new Button(this);
+            bX.setText("✕");
+            bX.setTextColor(0xFFB9A898);
+            bX.setBackgroundColor(Color.TRANSPARENT);
+            bX.setOnClickListener(v -> new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.remove_confirm, o.optString("name")))
+                    .setPositiveButton(R.string.remove, (dlg, w) -> removeContact(idx))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show());
+            row.addView(bX, new LinearLayout.LayoutParams(dp(44), dp(40)));
+            card.addView(row);
+
+            LinearLayout chips = new LinearLayout(this);
+            chips.setOrientation(LinearLayout.HORIZONTAL);
+            chips.setPadding(0, dp(6), 0, 0);
 
             Button bE = new Button(this);
             bE.setAllCaps(false);
@@ -307,16 +409,22 @@ public class MainActivity extends Activity {
             bE.setOnClickListener(v -> setEmergency(idx));
             LinearLayout.LayoutParams lpE = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, dp(36));
-            row.addView(bE, lpE);
+            lpE.setMarginEnd(dp(8));
+            chips.addView(bE, lpE);
 
-            Button bX = new Button(this);
-            bX.setText("✕");
-            bX.setTextColor(0xFFB9A898);
-            bX.setBackgroundColor(Color.TRANSPARENT);
-            bX.setOnClickListener(v -> removeContact(idx));
-            row.addView(bX, new LinearLayout.LayoutParams(dp(44), dp(40)));
+            Button bW = new Button(this);
+            bW.setAllCaps(false);
+            bW.setTextSize(12);
+            bW.setText(wa ? R.string.whatsapp_on : R.string.whatsapp_setup);
+            bW.setTextColor(wa ? Color.WHITE : 0xFF1F7A4D);
+            bW.setBackgroundResource(wa ? R.drawable.bg_chip_green : R.drawable.bg_chip);
+            bW.setPadding(dp(10), 0, dp(10), 0);
+            bW.setOnClickListener(v -> whatsappDialog(idx));
+            chips.addView(bW, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, dp(36)));
 
-            llContacts.addView(row);
+            card.addView(chips);
+            llContacts.addView(card);
         }
         if (a.length() == 0) {
             tvContactHint.setVisibility(View.VISIBLE);

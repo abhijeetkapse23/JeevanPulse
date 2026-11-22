@@ -20,7 +20,7 @@
     <string name="make_emergency">आपातकालीन बनाएँ</string>
     <string name="no_contacts">अभी कोई नहीं जोड़ा। 3 बार जवाब न देने पर ऐप सिर्फ़ 112 डायल करने का सुझाव देगा।</string>
     <string name="no_emergency">किसी एक को आपातकालीन बनाएँ — उन्हें कॉल जाएगी। वरना ऐप 112 का सुझाव देगा।</string>
-    <string name="how_text">कैसे काम करता है:\n1. नोटिफ़िकेशन आएगा: “मैं ठीक हूँ” दबाएँ।\n2. दबाया → फ़ोन में दर्ज, कुछ नहीं भेजा जाता।\n3. नहीं दबाया → अपनों को SMS जाएगा।\n4. लगातार 3 बार छूटा → आपातकालीन संपर्क को कॉल जाएगी।\n5. बाद में कभी भी दबाएँ → सब रीसेट और अपनों को बताया जाएगा कि आप ठीक हैं।</string>
+    <string name="how_text" formatted="false">कैसे काम करता है:\n1. नोटिफ़िकेशन आएगा: “मैं ठीक हूँ” दबाएँ।\n2. दबाया → फ़ोन में दर्ज, कुछ नहीं भेजा जाता।\n3. नहीं दबाया → अपनों को WhatsApp संदेश जाएगा (WhatsApp न हो या न चले तो SMS)।\n4. लगातार 3 बार छूटा → आपातकालीन संपर्क को कॉल जाएगी।\n5. बाद में कभी भी दबाएँ → सब रीसेट और अपनों को बताया जाएगा कि आप ठीक हैं।\n6. बैटरी 15% पर → अपनों को बताया जाएगा, क्योंकि बंद फ़ोन सूचना नहीं भेज सकता।</string>
     <string name="log_title">गतिविधि</string>
     <string name="log_empty">अभी कुछ नहीं।</string>
     <string name="default_name">आपके परिवार के सदस्य</string>
@@ -42,7 +42,6 @@
     <string name="log_ok">“मैं ठीक हूँ” दबाया</string>
     <string name="log_ok_told">“मैं ठीक हूँ” दबाया — अपनों को बताया सब ठीक है</string>
     <string name="log_missed">हाल-चाल छूटा (%2$d में से %1$d)</string>
-    <string name="log_sms">%1$d लोगों को SMS भेजा</string>
     <string name="log_sms_none">SMS नहीं गया — कोई संपर्क नहीं या SMS की अनुमति नहीं</string>
     <string name="log_call">%1$s को कॉल</string>
     <string name="log_call_blocked">%1$s को अपने-आप कॉल फ़ोन ने रोकी — दबाकर कॉल का विकल्प दिखाया</string>
@@ -50,5 +49,25 @@
     <string name="log_contact_added">%1$s जोड़े गए</string>
     <string name="toast_ok">दर्ज हो गया। अपनों को सूचना नहीं जाएगी।</string>
     <string name="toast_need_perm">कृपया SMS, फ़ोन और नोटिफ़िकेशन की अनुमति दें।</string>
+    <string name="log_sent">सूचना भेजी: %1$d WhatsApp पर, %2$d SMS से</string>
+    <string name="log_failed">%1$s तक नहीं पहुँचा (WhatsApp और SMS दोनों विफल)</string>
+    <string name="log_battery">बैटरी कम (%1$d%%) — अपनों को बताया</string>
+    <string name="msg_battery">JeevanPulse: %1$s के फ़ोन की बैटरी कम है (%2$d%%)। फ़ोन बंद हुआ तो सुरक्षा सूचना नहीं जा पाएगी। कृपया उन्हें चार्ज करने को कहें।</string>
+    <string name="whatsapp_on">WhatsApp ✓</string>
+    <string name="whatsapp_setup">WhatsApp सेट करें</string>
+    <string name="wa_dialog_title">%1$s के लिए WhatsApp सूचना</string>
+    <string name="wa_dialog_text">मुफ़्त WhatsApp सूचना CallMeBot सेवा से जाती है। %1$s को अपने फ़ोन पर एक बार यह करना है:\n\n1. “सेटअप गाइड” दबाएँ और वहाँ दिया CallMeBot नंबर सेव करें।\n2. WhatsApp पर उसे ठीक यही भेजें: I allow callmebot to send me messages\n3. जवाब में API key आएगी। वह key नीचे लिखें।\n4. “टेस्ट भेजें” दबाएँ: उन्हें WhatsApp संदेश आना चाहिए।\n\nWhatsApp न चले या इंटरनेट न हो, तो JeevanPulse SMS भेजेगा।</string>
+    <string name="wa_key_hint">API key (अंक)</string>
+    <string name="wa_save">सेव करें</string>
+    <string name="wa_guide">सेटअप गाइड</string>
+    <string name="wa_test">टेस्ट भेजें</string>
+    <string name="wa_testing">टेस्ट भेज रहे हैं…</string>
+    <string name="wa_test_msg">JeevanPulse टेस्ट: %1$s की सूचनाएँ आपको यहाँ WhatsApp पर मिलेंगी ✓</string>
+    <string name="wa_test_ok">WhatsApp पर टेस्ट गया ✓</string>
+    <string name="wa_test_fail">WhatsApp विफल। key और इंटरनेट जाँचें।</string>
+    <string name="log_wa_test_ok">%1$s को WhatsApp टेस्ट सफल</string>
+    <string name="log_wa_test_fail">%1$s को WhatsApp टेस्ट विफल</string>
+    <string name="remove_confirm">%1$s को हटाएँ?</string>
+    <string name="remove">हटाएँ</string>
     <string-array name="modes"><item>2 मिनट (टेस्टिंग)</item><item>12 घंटे</item><item>रोज़</item></string-array>
 </resources>

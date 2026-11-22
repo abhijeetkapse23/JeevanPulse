@@ -23,6 +23,24 @@ jobs:
         with:
           gradle-version: "8.11.1"
 
+      - name: Use private signing key (if set in repo secrets)
+        env:
+          JP_KEYSTORE_BASE64: ${{ secrets.JP_KEYSTORE_BASE64 }}
+          JP_STORE_PASSWORD: ${{ secrets.JP_STORE_PASSWORD }}
+          JP_KEY_ALIAS: ${{ secrets.JP_KEY_ALIAS }}
+          JP_KEY_PASSWORD: ${{ secrets.JP_KEY_PASSWORD }}
+        run: |
+          if [ -n "$JP_KEYSTORE_BASE64" ]; then
+            echo "$JP_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "JP_KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+            echo "JP_STORE_PASSWORD=$JP_STORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "JP_KEY_ALIAS=$JP_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "JP_KEY_PASSWORD=$JP_KEY_PASSWORD" >> "$GITHUB_ENV"
+            echo "Signing with the private key from secrets."
+          else
+            echo "::warning::No JP_KEYSTORE_BASE64 secret: signing with the old public key."
+          fi
+
       - name: Build APK
         run: gradle assembleRelease --no-daemon --console=plain 2>&1 | tee build.log
 

@@ -7,6 +7,8 @@ import android.content.Intent;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Pulse.onAlarm(context);
+        // goAsync keeps the app awake until WhatsApp/SMS sending has finished.
+        final PendingResult pr = goAsync();
+        Pulse.onAlarm(context, pr::finish);
     }
 }

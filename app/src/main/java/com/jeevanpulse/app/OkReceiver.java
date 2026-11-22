@@ -9,7 +9,8 @@ import android.widget.Toast;
 public class OkReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Pulse.ok(context);
         Toast.makeText(context, R.string.toast_ok, Toast.LENGTH_SHORT).show();
+        final PendingResult pr = goAsync();
+        Pulse.ok(context, pr::finish);
     }
 }

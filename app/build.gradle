@@ -10,16 +10,18 @@ android {
         applicationId "com.jeevanpulse.safety"
         minSdk 26
         targetSdk 34
-        versionCode 4
-        versionName "2.2"
+        versionCode 5
+        versionName "3.0"
     }
 
     signingConfigs {
         release {
-            storeFile file("jeevanpulse.keystore")
-            storePassword "jeevanpulse123"
-            keyAlias "jeevanpulse"
-            keyPassword "jeevanpulse123"
+            // Private key from GitHub Secrets when set (see README "Signing key").
+            // Falls back to the old public key so builds keep working until then.
+            storeFile file(System.getenv("JP_KEYSTORE_FILE") ?: "jeevanpulse.keystore")
+            storePassword System.getenv("JP_STORE_PASSWORD") ?: "jeevanpulse123"
+            keyAlias System.getenv("JP_KEY_ALIAS") ?: "jeevanpulse"
+            keyPassword System.getenv("JP_KEY_PASSWORD") ?: "jeevanpulse123"
             enableV1Signing true
             enableV2Signing true
             enableV3Signing true

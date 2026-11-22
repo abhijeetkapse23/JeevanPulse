@@ -20,7 +20,7 @@
     <string name="make_emergency">आपत्कालीन करा</string>
     <string name="no_contacts">अजून कोणीही जोडलेले नाही. 3 वेळा प्रतिसाद न दिल्यास ॲप फक्त 112 डायल करण्याचा पर्याय सुचवेल.</string>
     <string name="no_emergency">एका व्यक्तीला आपत्कालीन करा — त्यांना कॉल जाईल. नाहीतर ॲप 112 सुचवेल.</string>
-    <string name="how_text">कसे काम करते:\n1. नोटिफिकेशन येईल: “मी ठीक आहे” दाबा.\n2. दाबले → फोनमध्ये नोंद, काहीही पाठवले जात नाही.\n3. नाही दाबले → आपल्या माणसांना SMS जाईल.\n4. सलग 3 वेळा चुकले → आपत्कालीन संपर्काला कॉल जाईल.\n5. नंतर केव्हाही दाबा → सगळे रीसेट आणि तुम्ही ठीक आहात असे कळवले जाईल.</string>
+    <string name="how_text" formatted="false">कसे काम करते:\n1. नोटिफिकेशन येईल: “मी ठीक आहे” दाबा.\n2. दाबले → फोनमध्ये नोंद, काहीही पाठवले जात नाही.\n3. नाही दाबले → आपल्या माणसांना WhatsApp संदेश जाईल (WhatsApp नसेल किंवा चालला नाही तर SMS).\n4. सलग 3 वेळा चुकले → आपत्कालीन संपर्काला कॉल जाईल.\n5. नंतर केव्हाही दाबा → सगळे रीसेट आणि तुम्ही ठीक आहात असे कळवले जाईल.\n6. बॅटरी 15% वर → आपल्या माणसांना कळवले जाईल, कारण बंद फोन सूचना पाठवू शकत नाही.</string>
     <string name="log_title">नोंदी</string>
     <string name="log_empty">अजून काही नाही.</string>
     <string name="default_name">तुमच्या कुटुंबातील व्यक्ती</string>
@@ -42,7 +42,6 @@
     <string name="log_ok">“मी ठीक आहे” दाबले</string>
     <string name="log_ok_told">“मी ठीक आहे” दाबले — सगळे ठीक असल्याचे कळवले</string>
     <string name="log_missed">विचारपूस चुकली (%2$d पैकी %1$d)</string>
-    <string name="log_sms">%1$d जणांना SMS पाठवला</string>
     <string name="log_sms_none">SMS गेला नाही — संपर्क नाही किंवा SMS परवानगी नाही</string>
     <string name="log_call">%1$s ला कॉल</string>
     <string name="log_call_blocked">%1$s ला आपोआप कॉल फोनने थांबवला — दाबून कॉलचा पर्याय दाखवला</string>
@@ -50,5 +49,25 @@
     <string name="log_contact_added">%1$s जोडले</string>
     <string name="toast_ok">नोंद झाली. आपल्या माणसांना सूचना जाणार नाही.</string>
     <string name="toast_need_perm">कृपया SMS, फोन आणि नोटिफिकेशनची परवानगी द्या.</string>
+    <string name="log_sent">सूचना पाठवली: %1$d WhatsApp वर, %2$d SMS ने</string>
+    <string name="log_failed">%1$s पर्यंत पोहोचले नाही (WhatsApp आणि SMS दोन्ही अयशस्वी)</string>
+    <string name="log_battery">बॅटरी कमी (%1$d%%) — आपल्या माणसांना कळवले</string>
+    <string name="msg_battery">JeevanPulse: %1$s यांच्या फोनची बॅटरी कमी आहे (%2$d%%). फोन बंद झाला तर सुरक्षा सूचना जाऊ शकणार नाही. कृपया त्यांना चार्ज करायला सांगा.</string>
+    <string name="whatsapp_on">WhatsApp ✓</string>
+    <string name="whatsapp_setup">WhatsApp सेट करा</string>
+    <string name="wa_dialog_title">%1$s साठी WhatsApp सूचना</string>
+    <string name="wa_dialog_text">मोफत WhatsApp सूचना CallMeBot सेवेमार्फत जाते. %1$s यांनी त्यांच्या फोनवर एकदा हे करायचे:\n\n1. “सेटअप मार्गदर्शक” दाबा आणि तिथे दिलेला CallMeBot नंबर सेव्ह करा.\n2. WhatsApp वर त्याला नेमके हे पाठवा: I allow callmebot to send me messages\n3. उत्तरात API key येईल. ती key खाली लिहा.\n4. “टेस्ट पाठवा” दाबा: त्यांना WhatsApp संदेश यायला हवा.\n\nWhatsApp चालला नाही किंवा इंटरनेट नसेल तर JeevanPulse SMS पाठवेल.</string>
+    <string name="wa_key_hint">API key (अंक)</string>
+    <string name="wa_save">सेव्ह करा</string>
+    <string name="wa_guide">सेटअप मार्गदर्शक</string>
+    <string name="wa_test">टेस्ट पाठवा</string>
+    <string name="wa_testing">टेस्ट पाठवत आहे…</string>
+    <string name="wa_test_msg">JeevanPulse टेस्ट: %1$s यांच्या सूचना तुम्हाला इथे WhatsApp वर मिळतील ✓</string>
+    <string name="wa_test_ok">WhatsApp वर टेस्ट गेला ✓</string>
+    <string name="wa_test_fail">WhatsApp अयशस्वी. key आणि इंटरनेट तपासा.</string>
+    <string name="log_wa_test_ok">%1$s ला WhatsApp टेस्ट यशस्वी</string>
+    <string name="log_wa_test_fail">%1$s ला WhatsApp टेस्ट अयशस्वी</string>
+    <string name="remove_confirm">%1$s यांना काढायचे?</string>
+    <string name="remove">काढा</string>
     <string-array name="modes"><item>2 मिनिटे (टेस्टिंग)</item><item>12 तास</item><item>दररोज</item></string-array>
 </resources>

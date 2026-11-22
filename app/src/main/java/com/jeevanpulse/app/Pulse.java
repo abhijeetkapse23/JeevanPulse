@@ -12,17 +12,16 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.telecom.TelecomManager;
-import android.telephony.SmsManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -32,7 +31,7 @@ import java.util.Date;
  *  - After an "I'm OK" (or Start), the next prompt is scheduled after the check-in interval.
  *  - A prompt shows a notification with an "I'm OK" button and waits for the retry gap.
  *  - If the gap passes with no tap, that is a miss:
- *      miss 1          -> SMS to every loved one
+ *      miss 1          -> WhatsApp (SMS fallback) to every loved one
  *      miss 3, 6, 9... -> phone call to the emergency contact (or a 112 suggestion if none)
  *    and the prompt is shown again.
  *  - Tapping "I'm OK" at any point logs it, resets the counter, and (if loved ones were
@@ -47,6 +46,9 @@ public final class Pulse {
     static final int NOTIF_ALERT = 2;
     static final String ACTION_ALARM = "com.jeevanpulse.app.ALARM";
     static final String ACTION_OK = "com.jeevanpulse.app.OK";
+    static final String ACTION_BATTERY = "com.jeevanpulse.app.BATTERY";
+    static final int BATTERY_LOW = 15;
+    static final int BATTERY_RESET = 30;
     static final int CALL_AFTER = 3;
 
     /** {check-in interval minutes, retry gap minutes} for each mode in R.array.modes. */
@@ -80,16 +82,39 @@ public final class Pulse {
         return n.isEmpty() ? c.getString(R.string.default_name) : n;
     }
 
-    static JSONArray contacts(Context c) {
+    /**
+     * Loved ones, stored encrypted ("contacts_enc") with the Android Keystore.
+     * A plain list from an older version is encrypted and removed on first read.
+     */
+    static synchronized JSONArray contacts(Context c) {
+        SharedPreferences p = sp(c);
+        String enc = p.getString("contacts_enc", null);
+        if (enc != null) {
+            try {
+                return new JSONArray(Vault.decrypt(enc));
+            } catch (Exception e) {
+                return new JSONArray();
+            }
+        }
+        String plain = p.getString("contacts", null);
+        if (plain == null) return new JSONArray();
         try {
-            return new JSONArray(sp(c).getString("contacts", "[]"));
+            JSONArray a = new JSONArray(plain);
+            saveContacts(c, a);
+            return a;
         } catch (JSONException e) {
             return new JSONArray();
         }
     }
 
-    static void saveContacts(Context c, JSONArray a) {
-        sp(c).edit().putString("contacts", a.toString()).apply();
+    static synchronized void saveContacts(Context c, JSONArray a) {
+        try {
+            sp(c).edit().putString("contacts_enc", Vault.encrypt(a.toString()))
+                    .remove("contacts").commit();
+        } catch (Exception e) {
+            // Keystore unavailable on this phone: keep working rather than lose the list.
+            sp(c).edit().putString("contacts", a.toString()).remove("contacts_enc").commit();
+        }
     }
 
     static JSONObject emergencyContact(Context c) {
@@ -109,7 +134,7 @@ public final class Pulse {
         }
     }
 
-    static void addLog(Context c, String text) {
+    static synchronized void addLog(Context c, String text) {
         JSONArray old = log(c);
         JSONArray a = new JSONArray();
         try {
@@ -119,7 +144,7 @@ public final class Pulse {
             a.put(o);
             for (int i = 0; i < old.length() && i < 80; i++) a.put(old.get(i));
         } catch (JSONException ignored) { }
-        sp(c).edit().putString("log", a.toString()).apply();
+        sp(c).edit().putString("log", a.toString()).commit();
     }
 
     static String time(Context c, long t) {
@@ -138,6 +163,7 @@ public final class Pulse {
                 .apply();
         cancelNotifs(c);
         schedule(c, intervalMs(c));
+        scheduleBattery(c);
         String[] modes = c.getResources().getStringArray(R.array.modes);
         addLog(c, c.getString(R.string.log_started, modes[mode(c)]));
     }
@@ -145,13 +171,20 @@ public final class Pulse {
     static void stop(Context c) {
         sp(c).edit().putBoolean("active", false).putBoolean("awaiting", false).putInt("missed", 0).apply();
         AlarmManager am = c.getSystemService(AlarmManager.class);
-        if (am != null) am.cancel(alarmIntent(c));
+        if (am != null) {
+            am.cancel(alarmIntent(c));
+            am.cancel(batteryIntent(c));
+        }
         cancelNotifs(c);
         addLog(c, c.getString(R.string.log_stopped));
     }
 
-    /** User tapped "I'm OK" (in the app or on the notification). */
-    static void ok(Context c) {
+    /**
+     * User tapped "I'm OK" (in the app or on the notification).
+     * {@code done} runs once any message has been sent (may be null).
+     */
+    static void ok(Context c, Runnable done) {
+        Runnable fin = done != null ? done : () -> { };
         boolean alerted = sp(c).getBoolean("alerted", false);
         sp(c).edit()
                 .putBoolean("awaiting", false)
@@ -160,35 +193,86 @@ public final class Pulse {
                 .putLong("lastOk", System.currentTimeMillis())
                 .apply();
         cancelNotifs(c);
+        if (active(c)) schedule(c, intervalMs(c));
         if (alerted) {
-            sendSmsToAll(c, c.getString(R.string.sms_ok, displayName(c)));
             addLog(c, c.getString(R.string.log_ok_told));
+            Messenger.sendAll(c, c.getString(R.string.sms_ok, displayName(c)), fin);
         } else {
             addLog(c, c.getString(R.string.log_ok));
+            fin.run();
         }
-        if (active(c)) schedule(c, intervalMs(c));
     }
 
-    /** Called by the alarm. */
-    static void onAlarm(Context c) {
-        if (!active(c)) return;
+    /** Called by the alarm. {@code done} runs when all work, including sending, is finished. */
+    static void onAlarm(Context c, Runnable done) {
+        Runnable fin = done != null ? done : () -> { };
+        if (!active(c)) { fin.run(); return; }
         channels(c);
+        boolean sending = false;
         int missed = missed(c);
         if (awaiting(c)) {
             missed++;
             sp(c).edit().putInt("missed", missed).apply();
             addLog(c, c.getString(R.string.log_missed, missed, CALL_AFTER));
-            if (missed == 1) {
-                int sent = sendSmsToAll(c, c.getString(R.string.sms_alert, displayName(c)));
-                if (sent > 0) sp(c).edit().putBoolean("alerted", true).apply();
-            }
             if (missed % CALL_AFTER == 0) {
                 callEmergency(c, missed);
             }
+            if (missed == 1) {
+                sp(c).edit().putBoolean("awaiting", true).apply();
+                schedule(c, retryMs(c));
+                showPrompt(c, missed);
+                // Mark as alerted first, so an "I'm OK" tap during sending still sends "all OK".
+                if (contacts(c).length() > 0) sp(c).edit().putBoolean("alerted", true).apply();
+                Messenger.sendAll(c, c.getString(R.string.sms_alert, displayName(c)), fin);
+                sending = true;
+            }
         }
-        showPrompt(c, missed);
-        sp(c).edit().putBoolean("awaiting", true).apply();
-        schedule(c, retryMs(c));
+        if (!sending) {
+            showPrompt(c, missed);
+            sp(c).edit().putBoolean("awaiting", true).apply();
+            schedule(c, retryMs(c));
+            fin.run();
+        }
+    }
+
+    // ---------- battery ----------
+
+    static PendingIntent batteryIntent(Context c) {
+        Intent i = new Intent(c, BatteryReceiver.class).setAction(ACTION_BATTERY);
+        return PendingIntent.getBroadcast(c, 5, i,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /** Checks the battery about every 30 minutes while JeevanPulse is on. */
+    static void scheduleBattery(Context c) {
+        AlarmManager am = c.getSystemService(AlarmManager.class);
+        if (am == null) return;
+        am.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + AlarmManager.INTERVAL_HALF_HOUR,
+                AlarmManager.INTERVAL_HALF_HOUR, batteryIntent(c));
+    }
+
+    /**
+     * A dead phone is the one case where no alert can go out, so loved ones are told
+     * once when the battery drops to 15% (and not charging). Re-arms after charging.
+     */
+    static void checkBattery(Context c, Runnable done) {
+        Runnable fin = done != null ? done : () -> { };
+        if (!active(c)) { fin.run(); return; }
+        BatteryManager bm = c.getSystemService(BatteryManager.class);
+        int level = bm == null ? -1 : bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+        boolean charging = bm != null && bm.isCharging();
+        boolean told = sp(c).getBoolean("lowTold", false);
+        if (level > 0 && level <= BATTERY_LOW && !charging && !told) {
+            sp(c).edit().putBoolean("lowTold", true).apply();
+            addLog(c, c.getString(R.string.log_battery, level));
+            Messenger.sendAll(c, c.getString(R.string.msg_battery, displayName(c), level), fin);
+            return;
+        }
+        if (told && (charging || level >= BATTERY_RESET)) {
+            sp(c).edit().putBoolean("lowTold", false).apply();
+        }
+        fin.run();
     }
 
     /** After a reboot or app update, alarms are gone; set the next one again. */
@@ -197,6 +281,7 @@ public final class Pulse {
         long at = nextAt(c);
         long now = System.currentTimeMillis();
         schedule(c, at > now ? at - now : 60_000L);
+        scheduleBattery(c);
     }
 
     // ---------- scheduling ----------
@@ -294,37 +379,10 @@ public final class Pulse {
         nm.cancel(NOTIF_ALERT);
     }
 
-    // ---------- SMS & call ----------
+    // ---------- call ----------
 
     static boolean granted(Context c, String perm) {
         return c.checkSelfPermission(perm) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    static int sendSmsToAll(Context c, String msg) {
-        JSONArray a = contacts(c);
-        if (a.length() == 0 || !granted(c, Manifest.permission.SEND_SMS)) {
-            addLog(c, c.getString(R.string.log_sms_none));
-            return 0;
-        }
-        SmsManager sm = Build.VERSION.SDK_INT >= 31
-                ? c.getSystemService(SmsManager.class)
-                : SmsManager.getDefault();
-        int sent = 0;
-        for (int i = 0; i < a.length(); i++) {
-            JSONObject o = a.optJSONObject(i);
-            if (o == null) continue;
-            String phone = o.optString("phone", "");
-            if (phone.isEmpty()) continue;
-            try {
-                ArrayList<String> parts = sm.divideMessage(msg);
-                sm.sendMultipartTextMessage(phone, null, parts, null, null);
-                sent++;
-            } catch (Exception e) {
-                addLog(c, "SMS error: " + e.getMessage());
-            }
-        }
-        addLog(c, c.getString(R.string.log_sms, sent));
-        return sent;
     }
 
     static void callEmergency(Context c, int missed) {

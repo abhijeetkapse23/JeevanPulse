@@ -21,7 +21,7 @@
     <string name="make_emergency">Make emergency</string>
     <string name="no_contacts">No loved ones added yet. If you miss 3 check-ins, the app will only suggest dialling 112.</string>
     <string name="no_emergency">Mark one person as emergency — they get the phone call. Without one, the app suggests 112.</string>
-    <string name="how_text">How it works:\n1. You get a notification: tap “I\'m OK”.\n2. Tapped → logged on your phone, nothing is sent.\n3. Not tapped → your loved ones get an SMS.\n4. 3 missed in a row → your emergency contact is called.\n5. Tap any time later → everything resets and loved ones are told you\'re OK.</string>
+    <string name="how_text" formatted="false">How it works:\n1. You get a notification: tap “I\'m OK”.\n2. Tapped → logged on your phone, nothing is sent.\n3. Not tapped → your loved ones get a WhatsApp message (or an SMS if WhatsApp isn\'t set up or fails).\n4. 3 missed in a row → your emergency contact is called.\n5. Tap any time later → everything resets and loved ones are told you\'re OK.\n6. Battery at 15% → loved ones are told, because a dead phone can\'t send alerts.</string>
     <string name="log_title">Activity log</string>
     <string name="log_empty">Nothing yet.</string>
     <string name="default_name">Your family member</string>
@@ -43,7 +43,6 @@
     <string name="log_ok">Tapped I\'m OK</string>
     <string name="log_ok_told">Tapped I\'m OK — loved ones told all is well</string>
     <string name="log_missed">Missed check-in (%1$d of %2$d)</string>
-    <string name="log_sms">SMS sent to %1$d loved one(s)</string>
     <string name="log_sms_none">SMS not sent — no loved ones or no SMS permission</string>
     <string name="log_call">Calling %1$s</string>
     <string name="log_call_blocked">Phone blocked auto-call to %1$s — tap-to-call shown</string>
@@ -51,5 +50,25 @@
     <string name="log_contact_added">Added %1$s</string>
     <string name="toast_ok">Logged. Your loved ones won\'t be alerted.</string>
     <string name="toast_need_perm">Please allow SMS, Phone and Notifications so JeevanPulse can protect you.</string>
+    <string name="log_sent">Alert sent: %1$d on WhatsApp, %2$d by SMS</string>
+    <string name="log_failed">Could not reach %1$s (WhatsApp and SMS both failed)</string>
+    <string name="log_battery">Battery low (%1$d%%) — loved ones told</string>
+    <string name="msg_battery">JeevanPulse: %1$s\'s phone battery is low (%2$d%%). If it switches off, safety alerts can\'t be sent. Please remind them to charge it.</string>
+    <string name="whatsapp_on">WhatsApp ✓</string>
+    <string name="whatsapp_setup">Set up WhatsApp</string>
+    <string name="wa_dialog_title">WhatsApp alerts for %1$s</string>
+    <string name="wa_dialog_text">Free WhatsApp alerts use the CallMeBot service. %1$s does this once, on THEIR phone:\n\n1. Tap “Setup guide” and save the CallMeBot number shown there.\n2. On WhatsApp, send it exactly: I allow callmebot to send me messages\n3. They get a reply with an API key. Type that key below.\n4. Tap “Send test”: they should get a WhatsApp message.\n\nIf WhatsApp fails or there is no internet, JeevanPulse sends an SMS instead.</string>
+    <string name="wa_key_hint">API key (numbers)</string>
+    <string name="wa_save">Save</string>
+    <string name="wa_guide">Setup guide</string>
+    <string name="wa_test">Send test</string>
+    <string name="wa_testing">Sending test…</string>
+    <string name="wa_test_msg">JeevanPulse test: you will get WhatsApp alerts about %1$s here ✓</string>
+    <string name="wa_test_ok">Test sent on WhatsApp ✓</string>
+    <string name="wa_test_fail">WhatsApp failed. Check the key and the internet connection.</string>
+    <string name="log_wa_test_ok">WhatsApp test to %1$s worked</string>
+    <string name="log_wa_test_fail">WhatsApp test to %1$s failed</string>
+    <string name="remove_confirm">Remove %1$s from loved ones?</string>
+    <string name="remove">Remove</string>
     <string-array name="modes"><item>2 minutes (testing)</item><item>12 hours</item><item>Daily</item></string-array>
 </resources>
